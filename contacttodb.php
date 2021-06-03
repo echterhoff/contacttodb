@@ -56,14 +56,15 @@ if (!function_exists("dd_entities")) {
     }
 }
 
-use Joomla\CMS\Plugin\CMSPlugin;
-use Joomla\CMS\Event\Event;
+// use Joomla\CMS\Plugin\CMSPlugin;
+// use Joomla\CMS\Event\Event;
+// use Joomla\Event\SubscriberInterface;
 
 jimport('joomla.plugin.plugin');
 jimport('joomla.form.helper');
 
 
-class plgContactContacttodb extends JPlugin
+class plgContactContacttodb extends JPlugin //extends CMSPlugin implements SubscriberInterface
 {
 
     /**
@@ -86,7 +87,6 @@ class plgContactContacttodb extends JPlugin
      */
     function plgContactContacttodb(&$subject, $params)
     {
-        define("CTDB_CACHEPATH", JPATH_CACHE . "/plg_globalvariables");
         parent::__construct($subject, $params);
         $this->_plugin = JPluginHelper::getPlugin('system', 'contacttodb');
 
@@ -101,28 +101,33 @@ class plgContactContacttodb extends JPlugin
         $db = $this->db;
 
         $query = $db->getQuery(true);
-        $query->select($db->quoteName(array('id', 'name', 'email', 'subject', 'message', 'fields')));
-        $query->from($db->quoteName('#__contacttodb'));
-        $query->where($db->quoteName('name') . ' LIKE ' . $db->quote('lars%'));
-        $query->order('ordering ASC');
 
-        // Reset the query using our newly populated query object.
+        // Columns
+        $columns = array(
+            'name',
+            'email',
+            'subject',
+            'message',
+            'fields'
+        );
+
+        // Values
+        $values = array(
+            isset($data['contact_name']) ? $db->quote($data['contact_name']) : null,
+            isset($data['contact_email']) ? $db->quote($data['contact_email']) : null,
+            isset($data['contact_subject']) ? $db->quote($data['contact_subject']) : null,
+            isset($data['contact_message']) ? $db->quote($data['contact_message']) : null,
+            isset($data['com_fields']) ? $db->quote(json_encode($data['com_fields'])) : $db->quote(json_encode(null))
+        );
+
+        $query
+            ->insert($db->quoteName('#__contacttodb'))
+            ->columns($db->quoteName($columns))
+            ->values(implode(',', $values));
+
         $db->setQuery($query);
-
-        // Load the results as a list of stdClass objects (see later for more options on retrieving data).
-        $results = $db->loadObjectList();
-        print_r($results);
-
-
-        dd($data);
-        die('Works!');
+        $db->execute();
     }
 
-    function onValidateContact(&$contact, &$data)
-    {
-        if ($contact->id != 16)
-            return;
-        dd($data);
-        die('Works!');
-    }
+    // function onValidateContact(&$contact, &$data){ }
 }
