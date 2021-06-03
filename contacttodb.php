@@ -36,7 +36,6 @@ if (!function_exists("dd")) {
         }
         echo "</pre>";
     }
-
 }
 if (!function_exists("dd_entities")) {
 
@@ -55,8 +54,10 @@ if (!function_exists("dd_entities")) {
         }
         echo "</pre>";
     }
-
 }
+
+use Joomla\CMS\Plugin\CMSPlugin;
+use Joomla\CMS\Event\Event;
 
 jimport('joomla.plugin.plugin');
 jimport('joomla.form.helper');
@@ -65,6 +66,17 @@ jimport('joomla.form.helper');
 class plgContactContacttodb extends JPlugin
 {
 
+    /**
+     * Load the language file on instantiation
+     *
+     * @var    boolean
+     * @since  3.1
+     */
+    protected $autoloadLanguage = true;
+
+    protected $db;
+
+    protected $app;
 
     /**
      * Plugin constructor
@@ -77,24 +89,40 @@ class plgContactContacttodb extends JPlugin
         define("CTDB_CACHEPATH", JPATH_CACHE . "/plg_globalvariables");
         parent::__construct($subject, $params);
         $this->_plugin = JPluginHelper::getPlugin('system', 'contacttodb');
-		
-		$params = $this->params;
-		
-		
-	}
-	
-	function onSubmitContact(&$contact, &$data) {
-		if($contact->id != 16)
-			return;
-		dd($data);
-		die('Works!');		
-	}
-	
-	function onValidateContact(&$contact, &$data) {
-		if($contact->id != 16)
-			return;
-		dd($data);
-		die('Works!');
-	}
-	
+
+        $params = $this->params;
+    }
+
+    function onSubmitContact(&$contact, &$data)
+    {
+        if ($contact->id != 16)
+            return;
+
+        $db = $this->db;
+
+        $query = $db->getQuery(true);
+        $query->select($db->quoteName(array('id', 'name', 'email', 'subject', 'message', 'fields')));
+        $query->from($db->quoteName('#__contacttodb'));
+        $query->where($db->quoteName('name') . ' LIKE ' . $db->quote('lars%'));
+        $query->order('ordering ASC');
+
+        // Reset the query using our newly populated query object.
+        $db->setQuery($query);
+
+        // Load the results as a list of stdClass objects (see later for more options on retrieving data).
+        $results = $db->loadObjectList();
+        print_r($results);
+
+
+        dd($data);
+        die('Works!');
+    }
+
+    function onValidateContact(&$contact, &$data)
+    {
+        if ($contact->id != 16)
+            return;
+        dd($data);
+        die('Works!');
+    }
 }
