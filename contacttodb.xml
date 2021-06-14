@@ -19,6 +19,43 @@
 		<language tag="en-GB">en-GB.plg_contact_contacttodb.sys.ini</language>
 	</languages>
     <config>
+        <fields name="params"
+                class="controls controls-row"
+        >
+            <fieldset
+                addfieldpath="/plugin/contact/contacttodb/form/fields"
+                name="recipientmail"
+                label="Setup"
+            >
+                <field
+                    name="autoanswerenabled"
+                    type="checkbox"
+                    label="Auto answer enabled"
+                    description="Auto answer"
+                />
+                <field
+                    name="autoanswercontactid"
+                    type="text"
+                    label="ID of contact to auto answer"
+                    description=""
+                />
+                <field
+                    name="autoanswersubject"
+                    type="text"
+                    class="span6"
+                    label="Auto answer mail subject"
+                    description="Subject text for the auto answer mail."
+                />
+                <field
+                    name="autoanswerbody"
+                    type="editor"
+                    class="span6"
+                    label="Auto answer mail body"
+                    description="Body text for the auto answer mail."
+                    filter="safehtml"
+                />
+            </fieldset>
+        </fields>
     </config>
     <!--
 	<updateservers>
